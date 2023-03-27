@@ -139,7 +139,7 @@ public void escapeTimesOptimized (float[][] esc) {
     for(float j=0; j<cxa.length; j=j+1){
         cxa[((int)j)] = j * xStep;
     }
-    for (int i = 0; i < esc.length; i++) {
+    for (float i = 0; i < esc.length; i++) {
 
     //float cx = xMin + j * xStep;
     
@@ -151,7 +151,8 @@ public void escapeTimesOptimized (float[][] esc) {
                     System.out.println("cx is " + cx);
                     System.out.println("cxa[j] is " + cxa[j]);
                 }  */
-            cx.add(FloatVector.fromArray(SPECIES, cxa, j));
+            var cxIncrement = FloatVector.fromArray(SPECIES, cxa, j);
+            cx = cx.add(cxIncrement);
              
            /*if(i == 0 && j == 272){
                     System.out.println("cx is " + cx);
@@ -160,35 +161,34 @@ public void escapeTimesOptimized (float[][] esc) {
             
             
             var cy = FloatVector.broadcast(SPECIES, yMin + i * yStep);
-            //cx.addIndex(1);
             var zx = FloatVector.broadcast(SPECIES, 0);
             var zy = FloatVector.broadcast(SPECIES, 0);
             var iter = FloatVector.broadcast(SPECIES, 0);
             var bitMask = ((zx.mul(zx)).add(zy.mul(zy))).lt(maxSquareModulus);
             //var done = VectorMask.fromArray(SPECIES, ar, 0);
-
-            for(int dummyIter=0; dummyIter<maxIter; dummyIter++) {
+            int dummyIter = 0;
+            while(dummyIter<maxIter && bitMask.anyTrue()) {
             
                 bitMask = (((zx.mul(zx)).add(zy.mul(zy))).lt(maxSquareModulus));
                 iter = iter.add(1, bitMask);
                 //done = done.or(bitMask);
-                var z = ((zx.mul(zx, bitMask)).sub(zy.mul(zy, bitMask), bitMask)).add(cx, bitMask);
+                var z = ((zx.mul(zx)).sub(zy.mul(zy))).add(cx);
                 //zx is a and zy is b in a+bi. hence, this reads as
             
-                zy = (zx.mul(zx, bitMask).mul(2, bitMask)).add(cy, bitMask);
+                zy = (zx.mul(zy).mul(2)).add(cy);
                 //Im(z) = 2ab + b
                 zx = z;
-        
+                dummyIter++;
 		    }
-            iter.intoArray(esc[i], j);
+            iter.intoArray(esc[(int)i], j);
 	}
-    }
- /*   	for (; j < esc[0].length; j++) {
+    
+    	for (; j < esc[0].length; j++) {
         //we're now gonna work to fill in each entry of esc[i][j] with the escape times of each point (i,j).
 		int iter = 0;
 		float cx = xMin + j * xStep;
         //current x and current y of the point that the loop is pointing to.
-
+        float cy = yMin + i * yStep;
 		float zx = 0;
         //Re(z)
 		float zy = 0;
@@ -205,9 +205,9 @@ public void escapeTimesOptimized (float[][] esc) {
 		    iter++;		    
 		}
 
-		esc[i][j] = iter;
-	    } */
-
+		esc[(int)i][j] = iter;
+	    } 
+    }
 }
 
 }
