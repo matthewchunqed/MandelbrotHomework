@@ -134,16 +134,21 @@ public void escapeTimesOptimized (float[][] esc) {
 	int step = SPECIES.length();
 	//int bound1 = SPECIES.loopBound(esc.length);
     int bound2 = SPECIES.loopBound(esc[0].length);  
+    //loop bound
 
     float[] cxa = new float[esc[0].length];
+    //array that will store the incremental bits of the cx[] vector to be declared soon
     for(float j=0; j<cxa.length; j=j+1){
         cxa[((int)j)] = j * xStep;
     }
-    for (float i = 0; i < esc.length; i++) {
+    //adds the corresponding incremental parts to cxa.
 
+    for (float i = 0; i < esc.length; i++) {
     //float cx = xMin + j * xStep;
     
     int j = 0;
+    float cy = yMin + i * yStep;
+    //cy as defined before
     for (; j < bound2; j += step) {
             //float cx = xMin + j * xStep;                    
             var cx = FloatVector.broadcast(SPECIES, xMin);
@@ -153,6 +158,7 @@ public void escapeTimesOptimized (float[][] esc) {
                 }  */
             var cxIncrement = FloatVector.fromArray(SPECIES, cxa, j);
             cx = cx.add(cxIncrement);
+            //cx is equal to the incremental part plus the xMin base
              
            /*if(i == 0 && j == 272){
                     System.out.println("cx is " + cx);
@@ -160,35 +166,40 @@ public void escapeTimesOptimized (float[][] esc) {
                 System.out.println("\n"); */
             
             
-            var cy = FloatVector.broadcast(SPECIES, yMin + i * yStep);
             var zx = FloatVector.broadcast(SPECIES, 0);
             var zy = FloatVector.broadcast(SPECIES, 0);
+            //set them to 0 as per before
             var iter = FloatVector.broadcast(SPECIES, 0);
+            //iter will be what adds into the esc[i][j]
+
             var bitMask = ((zx.mul(zx)).add(zy.mul(zy))).lt(maxSquareModulus);
-            //var done = VectorMask.fromArray(SPECIES, ar, 0);
+            //determines if it's less than the modulus to stop the loop
+
             int dummyIter = 0;
             while(dummyIter<maxIter && bitMask.anyTrue()) {
             
                 bitMask = (((zx.mul(zx)).add(zy.mul(zy))).lt(maxSquareModulus));
                 iter = iter.add(1, bitMask);
-                //done = done.or(bitMask);
+                //updates the iter to determine if it should be added to an increment of esc[i][j]
+
                 var z = ((zx.mul(zx)).sub(zy.mul(zy))).add(cx);
                 //zx is a and zy is b in a+bi. hence, this reads as
-            
                 zy = (zx.mul(zy).mul(2)).add(cy);
                 //Im(z) = 2ab + b
                 zx = z;
                 dummyIter++;
+                //increments dummyIter
 		    }
             iter.intoArray(esc[(int)i], j);
 	}
     
     	for (; j < esc[0].length; j++) {
         //we're now gonna work to fill in each entry of esc[i][j] with the escape times of each point (i,j).
+        //with every part that steps did not cover above
 		int iter = 0;
 		float cx = xMin + j * xStep;
         //current x and current y of the point that the loop is pointing to.
-        float cy = yMin + i * yStep;
+        //cy already defined!
 		float zx = 0;
         //Re(z)
 		float zy = 0;
@@ -206,6 +217,7 @@ public void escapeTimesOptimized (float[][] esc) {
 		}
 
 		esc[(int)i][j] = iter;
+        //completes the end part w/old code reuse for once threads are no longer being used.
 	    } 
     }
 }
