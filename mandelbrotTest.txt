@@ -2,17 +2,16 @@ warning: using incubating module(s): jdk.incubator.vector
 1 warning
 WARNING: Using incubator modules: jdk.incubator.vector
 Running correctness tests...
-Correctness test failed.
-params [-2.0, 1.0, -1.5, 1.5, 100.0, 100.0]
-i = 0, j = 276
-besc = 4.0, vesc = 3.0
+Correcntess test passed.
 Running performance tests...
 |--------------------|---------------|----------------|-------------|
 |       region       | baseline (ms) | optimized (ms) | improvement |
 |--------------------|---------------|----------------|-------------|
-|           full set |         641   |          631   |      1.02   |
-|    elephant valley |        3297   |         1287   |      2.56   |
-|   sea horse valley |        4702   |         1289   |      3.65   |
-|          explosion |        5190   |         6466   |      0.80   |
-|             zoooom |       26388   |        32370   |      0.82   |
+|           full set |         630   |           96   |      6.56   |
+|    elephant valley |        3252   |          455   |      7.14   |
+|   sea horse valley |        4633   |          631   |      7.33   |
+|             zoooom |       25794   |        21496   |      1.20   |
+|--------------------|---------------|----------------|-------------|
+|          explosion |        5086   |         1018   |      5.00   |
+|             zoooom |       25780   |         7031   |      3.67   |
 |--------------------|---------------|----------------|-------------|
